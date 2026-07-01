@@ -1,0 +1,33 @@
+[package]
+name = "rsomics-modularity"
+version = "0.1.0"
+edition = "2021"
+description = "Newman-Girvan modularity Q of a graph partition — value-exact port of networkx.community.modularity"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/omics-rust/rsomics-modularity"
+authors = ["Zane Leong <efd@live.com>"]
+categories = ["science", "command-line-utilities"]
+keywords = ["bioinformatics", "graph", "community", "modularity", "networkx"]
+readme = "README.md"
+
+[[bin]]
+name = "rsomics-modularity"
+path = "src/main.rs"
+
+[lib]
+name = "rsomics_modularity"
+path = "src/lib.rs"
+doctest = false
+
+[dependencies]
+rsomics-common = "0.6"
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+
+[dev-dependencies]
+criterion = { version = "0.5", default-features = false, features = ["cargo_bench_support"] }
+serde_json = "1"
+
+[[bench]]
+name = "bench"
+harness = false

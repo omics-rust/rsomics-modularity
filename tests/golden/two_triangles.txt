@@ -1,0 +1,7 @@
+# undirected edge list
+a b
+b c
+a c
+d e
+e f
+d f
