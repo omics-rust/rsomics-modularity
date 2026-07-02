@@ -1,0 +1,6 @@
+# triangle a-b-c-a bridged to d, plus a self-loop on d
+a b
+b c
+c a
+c d
+d d

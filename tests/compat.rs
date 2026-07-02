@@ -80,6 +80,38 @@ case!(
 case!(gnm_a, "gnm_a.txt", "gnm_a.part", 1.0, 0.3328858024691358);
 case!(gnm_b, "gnm_b.txt", "gnm_b.part", 1.0, 0.296784375);
 
+// Self-loops: networkx counts a self-loop as +2 degree and one within-community
+// edge. `selfloop_bridge` = triangle {a,b,c} bridged to d with a self-loop on d;
+// `selfloop_isolated` = triangle plus a node whose only edge is a self-loop.
+case!(
+    selfloop_bridge,
+    "selfloop_bridge.txt",
+    "selfloop_bridge.part",
+    1.0,
+    0.22
+);
+case!(
+    selfloop_bridge_res2,
+    "selfloop_bridge.txt",
+    "selfloop_bridge.part",
+    2.0,
+    -0.36
+);
+case!(
+    selfloop_isolated,
+    "selfloop_isolated.txt",
+    "selfloop_isolated.part",
+    1.0,
+    0.375
+);
+case!(
+    selfloop_isolated_res2,
+    "selfloop_isolated.txt",
+    "selfloop_isolated.part",
+    2.0,
+    -0.25
+);
+
 #[test]
 fn not_a_partition_missing_node_bails() {
     let edges = "a b\nb c\nc a\n";

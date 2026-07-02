@@ -1,0 +1,5 @@
+# triangle a-b-c-a, plus an isolated node x carrying only a self-loop
+a b
+b c
+c a
+x x

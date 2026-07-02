@@ -17,8 +17,9 @@ pub const META: ToolMeta = ToolMeta {
 /// (`networkx.community.modularity`, undirected + unweighted).
 ///
 /// Reads an undirected edge list (`u v` per line; `#` comments and blank lines
-/// skipped; string node names; parallel edges deduplicated and self-loops
-/// dropped as in a simple `nx.Graph`). Every node must be assigned to exactly
+/// skipped; string node names; parallel edges deduplicated; a self-loop adds 2
+/// to its node's degree and counts as one within-community edge, as in a simple
+/// `nx.Graph`). Every node must be assigned to exactly
 /// one community in `--communities`, or the tool fails loud (networkx's
 /// `NotAPartition`). Community iteration order is the first-appearance order of
 /// the labels in that file. Output is the single float Q.

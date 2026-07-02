@@ -11,10 +11,11 @@
 //!
 //! For an undirected graph `out_degree_sum == in_degree_sum` is the sum of node
 //! degrees in community `c`, `deg_sum = Σ_v deg(v)`, `m = deg_sum / 2`,
-//! `norm = 1 / deg_sum²`, and `L_c` is the number of intra-community edges
-//! (each counted once). The per-community terms are summed left-to-right in the
-//! order the communities are given — matching networkx's `sum(map(...))` — so
-//! the floating-point result is bit-identical.
+//! `norm = 1 / deg_sum²`, and `L_c` is the intra-community edge weight. A
+//! self-loop follows networkx semantics: it adds 2 to its node's degree and
+//! counts as one within-community edge in `L_c`. The per-community terms are
+//! summed left-to-right in the order the communities are given — matching
+//! networkx's `sum(map(...))` — so the floating-point result is bit-identical.
 
 use std::collections::HashMap;
 
@@ -22,12 +23,13 @@ use rsomics_common::RsomicsError;
 use serde::Serialize;
 
 /// Undirected simple graph over interned integer node ids. Neighbour lists are
-/// dedup'd so parallel edges collapse and self-loops are dropped, matching a
-/// bona-fide `nx.Graph` built from simple edge-list input.
+/// dedup'd so parallel edges collapse, and a self-loop is recorded once per node
+/// via `self_loop`, matching a bona-fide `nx.Graph` built from edge-list input.
 pub struct Graph {
     node_to_idx: HashMap<String, usize>,
     idx_to_node: Vec<String>,
     adj: Vec<Vec<usize>>,
+    self_loop: Vec<bool>,
 }
 
 impl Graph {
@@ -39,6 +41,7 @@ impl Graph {
         self.node_to_idx.insert(name.to_owned(), idx);
         self.idx_to_node.push(name.to_owned());
         self.adj.push(Vec::new());
+        self.self_loop.push(false);
         idx
     }
 
@@ -47,19 +50,22 @@ impl Graph {
         self.idx_to_node.len()
     }
 
+    /// networkx degree: a self-loop contributes 2.
     fn degree(&self, v: usize) -> usize {
-        self.adj[v].len()
+        self.adj[v].len() + if self.self_loop[v] { 2 } else { 0 }
     }
 }
 
 /// Parse a whitespace-delimited `u v` edge list. `#` comments and blank lines
-/// are skipped, parallel edges deduplicated and self-loops dropped.
+/// are skipped, parallel edges deduplicated, and a repeated self-loop collapses
+/// to a single one — as in a simple `nx.Graph`.
 #[must_use]
 pub fn parse_edge_list(input: &str) -> Graph {
     let mut g = Graph {
         node_to_idx: HashMap::new(),
         idx_to_node: Vec::new(),
         adj: Vec::new(),
+        self_loop: Vec::new(),
     };
 
     for line in input.lines() {
@@ -74,6 +80,7 @@ pub fn parse_edge_list(input: &str) -> Graph {
         let ui = g.intern(u);
         let vi = g.intern(v);
         if ui == vi {
+            g.self_loop[ui] = true;
             continue;
         }
         if !g.adj[ui].contains(&vi) {
@@ -162,6 +169,9 @@ fn modularity_q(g: &Graph, comm_of: &[usize], n_communities: usize, resolution: 
             if comm_of[w] == cv && v < w {
                 l_c[cv] += 1;
             }
+        }
+        if g.self_loop[v] {
+            l_c[cv] += 1;
         }
     }
 
