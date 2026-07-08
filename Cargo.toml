@@ -1,6 +1,6 @@
 [package]
 name = "rsomics-modularity"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 description = "Newman-Girvan modularity Q of a graph partition — value-exact port of networkx.community.modularity"
 license = "MIT OR Apache-2.0"

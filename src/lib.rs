@@ -69,8 +69,9 @@ pub fn parse_edge_list(input: &str) -> Graph {
     };
 
     for line in input.lines() {
-        let line = line.trim();
-        if line.is_empty() || line.starts_with('#') {
+        // nx.parse_edgelist strips a '#' comment anywhere in the line before tokenising.
+        let line = line.split('#').next().unwrap_or("").trim();
+        if line.is_empty() {
             continue;
         }
         let mut parts = line.split_whitespace();
@@ -197,4 +198,24 @@ pub fn modularity_from_edge_list(
     let comm_of = community_ids(&g, assignments, &mut n_communities)?;
     let q = modularity_q(&g, &comm_of, n_communities, resolution);
     Ok(Modularity { modularity: q })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::modularity_from_edge_list;
+
+    #[test]
+    fn inline_hash_comment_matches_clean_graph() {
+        let assignments = [
+            ("0".to_owned(), "a".to_owned()),
+            ("1".to_owned(), "a".to_owned()),
+            ("2".to_owned(), "b".to_owned()),
+            ("3".to_owned(), "b".to_owned()),
+        ];
+        let commented = "0 1\n1 2#c\n2 3\n0 #x\n";
+        let clean = "0 1\n1 2\n2 3\n";
+        let q_commented = modularity_from_edge_list(commented, &assignments, 1.0).unwrap();
+        let q_clean = modularity_from_edge_list(clean, &assignments, 1.0).unwrap();
+        assert_eq!(q_commented.modularity, q_clean.modularity);
+    }
 }
